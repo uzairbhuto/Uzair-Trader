@@ -1,6 +1,6 @@
 /* Uzair Traders service worker.
    Site ko update karne par neeche wala version number badal dein (v1 -> v2) taake purane users ko naya version mile. */
-const CACHE = "uzair-traders-v1";
+const CACHE = "uzair-traders-v3";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x)))).then(() => self.clients.claim())); });
