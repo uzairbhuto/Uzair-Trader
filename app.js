@@ -59,7 +59,7 @@ function msg(){
 function cartV(){
   const items = Object.entries(cart).filter(([id]) => byId(+id));
   if (!items.length) return `<div class="empty"><b>Cart khali hai</b>Products add karein aur WhatsApp par order bhejein.</div>`;
-  return `<div class="sec" style="margin-top:8px"><h3 class="serif">Meri Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" style="min-height:0">${p.name}</div><div class="pb">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
+  return `<div class="sec" style="margin-top:8px"><h3 class="serif">My Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" style="min-height:0">${p.name}</div><div class="pb">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
   <div class="tot"><span>Total</span><span>${pkr(cartTotal())}</span></div><a class="wa" href="${msg()}" target="_blank" rel="noopener">WhatsApp par Order Karein</a><button class="ghost" id="clr">Cart khali karein</button>`;
 }
 function acct(){
@@ -85,21 +85,29 @@ function show(v){ view = v; draw(); }
 function toList(o){ F = Object.assign({ cat: "", brand: "", q: "", sort: "" }, o); page = 24; $("#q").value = F.q; show("list"); }
 function add(id, n){ cart[id] = (cart[id] || 0) + (n || 1); save(); toast("Cart mein add ho gaya"); $("#cartBadge").textContent = cartCount(); draw(true); }
 function wishT(id){ wish = wish.includes(id) ? wish.filter(x => x !== id) : [...wish, id]; save(); draw(true); }
+let vidTimer = 0;
 function openP(id){
   const p = byId(id); let qty = 1; if (!p) return;
   const s = $("#sheet");
-  const render = () => { s.innerHTML = `<div class="top"><button class="ib" id="cl" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><button class="ib heart ${wish.includes(p.id) ? "on" : ""}" id="sw" style="background:none">${HEART}</button></div><div class="body"><div class="big">${p.video ? `<video src="${p.video}" controls playsinline poster="${p.image}"></video>` : `<img src="${p.image}" alt="">`}</div>${p.video ? `<div class="big" style="margin-top:10px"><img src="${p.image}" alt=""></div>` : ""}<div class="pb" style="margin-top:12px">${p.brand} &middot; ${CAT_LABEL[p.category] || ""}</div><h1 class="serif">${p.name}</h1><div class="price">${pkr(p.price)}</div>${p.description ? `<div class="desc">${p.description}</div>` : ""}</div><div class="act"><span class="q"><button id="qm">&minus;</button><span>${qty}</span><button id="qp">+</button></span><button class="cta o" id="ac">Add to Cart</button><a class="cta" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(`Assalam-o-Alaikum, mujhe "${p.name}" (${p.brand}) order karna hai. Price: ${pkr(p.price)}.${qty > 1 ? ` Quantity: ${qty}. Subtotal: ${pkr(p.price * qty)}.` : ""}`)}">Order</a></div>`;
-    $("#cl").onclick = closeP; $("#sw").onclick = () => { wishT(p.id); render(); };
-    $("#qm").onclick = () => { qty = Math.max(1, qty - 1); render(); }; $("#qp").onclick = () => { qty++; render(); };
+  const link = () => `https://wa.me/${WA}?text=` + encodeURIComponent(`Assalam-o-Alaikum, mujhe "${p.name}" (${p.brand}) order karna hai. Price: ${pkr(p.price)}.${qty > 1 ? ` Quantity: ${qty}. Subtotal: ${pkr(p.price * qty)}.` : ""}`);
+  const upd = () => { $("#qv").textContent = qty; $("#wo").href = link(); };
+  const render = () => { s.innerHTML = `<div class="top"><button class="ib" id="cl" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><button class="ib heart ${wish.includes(p.id) ? "on" : ""}" id="sw" style="background:none">${HEART}</button></div><div class="body"><div class="big">${p.video ? `<video src="${p.video}" controls playsinline preload="auto" poster="${p.image}"></video>` : `<img src="${p.image}" alt="">`}</div>${p.video ? `<div class="big" style="margin-top:10px"><img src="${p.image}" alt=""></div>` : ""}<div class="pb" style="margin-top:12px">${p.brand} &middot; ${CAT_LABEL[p.category] || ""}</div><h1 class="serif">${p.name}</h1><div class="price">${pkr(p.price)}</div>${p.description ? `<div class="desc">${p.description}</div>` : ""}</div><div class="act"><span class="q"><button id="qm">&minus;</button><span id="qv">${qty}</span><button id="qp">+</button></span><button class="cta o" id="ac">Add to Cart</button><a id="wo" class="cta" style="text-decoration:none" target="_blank" rel="noopener" href="${link()}">Order</a></div>`;
+    $("#cl").onclick = closeP; $("#sw").onclick = () => { wishT(p.id); $("#sw").classList.toggle("on", wish.includes(p.id)); };
+    $("#qm").onclick = () => { qty = Math.max(1, qty - 1); upd(); }; $("#qp").onclick = () => { qty++; upd(); };
     $("#ac").onclick = () => { add(p.id, qty); closeP(); }; };
   render(); s.classList.add("open");
+  clearTimeout(vidTimer);
+  if (p.video) vidTimer = setTimeout(() => { /* video 3 second baad khud ek dafa chalegi; khatam hone par dobara khud nahi chalegi */
+    const v = s.querySelector("video"); if (!v || !s.classList.contains("open")) return;
+    if (v.paused && v.currentTime === 0 && !v.ended){ const r = v.play(); if (r && r.catch) r.catch(() => { v.muted = true; v.play().catch(() => {}); }); }
+  }, 3000);
   try { history.pushState({ sheet: 1 }, ""); } catch (e) {}
 }
-function closeP(){ const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; try { if (history.state && history.state.sheet) history.back(); } catch (e) {} } }
-window.addEventListener("popstate", () => { const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; } $("#drawer").classList.remove("open"); });
+function closeP(){ clearTimeout(vidTimer); const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; try { if (history.state && history.state.sheet) history.back(); } catch (e) {} } }
+window.addEventListener("popstate", () => { clearTimeout(vidTimer); const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; } $("#drawer").classList.remove("open"); });
 function drawer(o){
   const d = $("#drawer"); d.classList.toggle("open", o);
-  if (o) $("#pn2").innerHTML = `<div class="logo serif" style="margin-bottom:14px"><img src="${LOGO}" alt="">Uzair <b>Traders</b></div><button class="l" data-dgo="">Saare Products</button><div class="pb" style="margin:14px 0 4px">BRANDS</div>${BRANDS.map(b => `<button class="l" data-dbrand="${b}">${b}</button>`).join("")}<div class="pb" style="margin:14px 0 4px">MORE</div><button class="l" data-dv="acct">Rabta &amp; Auqat</button><a class="l" style="display:block;padding:11px 0;color:#25a244;text-decoration:none;font-weight:600" target="_blank" rel="noopener" href="https://wa.me/${WA}">WhatsApp: 0319-3455171</a>`;
+  if (o) $("#pn2").innerHTML = `<div class="logo serif" style="margin-bottom:14px"><img src="${LOGO}" alt="">Uzair <b>Traders</b></div><button class="l" data-dgo="">All Products</button><div class="pb" style="margin:14px 0 4px">BRANDS</div>${BRANDS.map(b => `<button class="l" data-dbrand="${b}">${b}</button>`).join("")}<div class="pb" style="margin:14px 0 4px">MORE</div><button class="l" data-dv="acct">Rabta &amp; Auqat</button><a class="l" style="display:block;padding:11px 0;color:#25a244;text-decoration:none;font-weight:600" target="_blank" rel="noopener" href="https://wa.me/${WA}">WhatsApp: 0319-3455171</a>`;
 }
 
 let SG = [], sgI = -1;
