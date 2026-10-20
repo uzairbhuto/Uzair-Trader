@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 6: My Cart, All Products, video 3 second autoplay, chips position, no Cart khali button */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -60,7 +60,7 @@ function cartV(){
   const items = Object.entries(cart).filter(([id]) => byId(+id));
   if (!items.length) return `<div class="empty"><b>Cart khali hai</b>Products add karein aur WhatsApp par order bhejein.</div>`;
   return `<div class="sec" style="margin-top:8px"><h3 class="serif">My Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" style="min-height:0">${p.name}</div><div class="pb">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
-  <div class="tot"><span>Total</span><span>${pkr(cartTotal())}</span></div><a class="wa" href="${msg()}" target="_blank" rel="noopener">WhatsApp par Order Karein</a><button class="ghost" id="clr">Cart khali karein</button>`;
+  <div class="tot"><span>Total</span><span>${pkr(cartTotal())}</span></div><a class="wa" href="${msg()}" target="_blank" rel="noopener">WhatsApp par Order Karein</a>`;
 }
 function acct(){
   return `<div class="card" style="text-align:center"><img src="${LOGO}" alt="" data-lb style="width:84px;height:84px;border-radius:50%;object-fit:cover;cursor:pointer"><h3 class="serif" style="margin-top:8px">Uzair Traders</h3><p>Premium Cosmetics &amp; Personal Care<br>100% original products</p></div>
@@ -71,9 +71,17 @@ function acct(){
 }
 function draw(keep){
   if (!keep && document.activeElement !== $("#q")) closeSug();
-  const m = $("#main"), y = m.scrollTop;
+  const m = $("#main"), y = m.scrollTop, oldRows = [...m.querySelectorAll(".chips")].map(r => r.scrollLeft);
   m.innerHTML = { home, list, cats, wish: wishV, cart: cartV, acct }[view]();
   m.scrollTop = keep ? y : 0;
+  /* Filter chips: purani position wahi rakhein, aur selected chip hamesha nazar aaye */
+  const rows = [...m.querySelectorAll(".chips")];
+  rows.forEach((r, i) => {
+    if (oldRows.length === rows.length) r.scrollLeft = oldRows[i];
+    const a = r.querySelector(".chip.on"); if (!a) return;
+    const rr = r.getBoundingClientRect(), ar = a.getBoundingClientRect();
+    if (ar.left < rr.left + 8 || ar.right > rr.right - 8) r.scrollLeft += (ar.left + ar.width / 2) - (rr.left + rr.width / 2);
+  });
   $("#nav").innerHTML = [["home", "Home"], ["cats", "Categories"], ["wish", "Wishlist"], ["cart", "Cart"], ["acct", "Account"]].map(([k, t]) => `<button data-v="${k}" class="${view === k || (view === "list" && k === "cats") ? "on" : ""}"><svg viewBox="0 0 24 24">${ICON[k]}</svg>${t}${k === "cart" ? `<span class="badge">${cartCount() || ""}</span>` : ""}${k === "wish" ? `<span class="badge">${wish.length || ""}</span>` : ""}</button>`).join("");
   $("#cartBadge").textContent = cartCount() || "";
   $(".sb").style.display = ["cart", "acct"].includes(view) ? "none" : "";
