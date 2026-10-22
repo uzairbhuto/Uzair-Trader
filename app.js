@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 8: My Cart, All Products, video 3 second autoplay, title tap opens product, newest cart item on top */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 9: My Cart, All Products, video 3 second autoplay, title tap opens product, newest cart item on top, All Brands, blue sort menu */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -41,9 +41,9 @@ function home(){
 function list(){
   const l = filtered(), t = F.q ? `"${F.q}"` : (F.cat ? CAT_LABEL[F.cat] : (F.brand || "All Products"));
   return `<div class="sec" style="margin-top:8px"><h3 class="serif">${t}</h3></div>
-  <div class="chips"><button class="chip ${F.brand ? "" : "on"}" data-brand="">Saari Brands</button>${BRANDS.map(b => `<button class="chip ${F.brand === b ? "on" : ""}" data-brand="${b}">${b}</button>`).join("")}</div>
+  <div class="chips"><button class="chip ${F.brand ? "" : "on"}" data-brand="">All Brands</button>${BRANDS.map(b => `<button class="chip ${F.brand === b ? "on" : ""}" data-brand="${b}">${b}</button>`).join("")}</div>
   <div class="chips"><button class="chip ${F.cat ? "" : "on"}" data-cat="">All</button>${CATS.map(c => `<button class="chip ${F.cat === c ? "on" : ""}" data-cat="${c}">${CAT_LABEL[c]}</button>`).join("")}</div>
-  <div class="bar"><span>${l.length} products</span><select id="sort"><option value="">Sort: Default</option><option value="lo" ${F.sort === "lo" ? "selected" : ""}>Price: Low to High</option><option value="hi" ${F.sort === "hi" ? "selected" : ""}>Price: High to Low</option></select></div>
+  <div class="bar"><span>${l.length} products</span><div class="sortw"><button class="sortb" id="sortb">${{"": "Sort: Default", lo: "Price: Low to High", hi: "Price: High to Low"}[F.sort || ""]} &#9662;</button><div class="sortm" id="sortm">${[["", "Sort: Default"], ["lo", "Price: Low to High"], ["hi", "Price: High to Low"]].map(([k, t]) => `<button data-sort="${k}" class="${(F.sort || "") === k ? "on" : ""}">${t}${(F.sort || "") === k ? "<span>&#10003;</span>" : ""}</button>`).join("")}</div></div></div>
   ${l.length ? `<div class="grid">${l.map(card).join("")}</div>` : `<div class="empty"><b>Koi product nahi mila</b>Kisi aur lafz se search karein.</div>`}`;
 }
 function cats(){
@@ -150,12 +150,15 @@ $("#q").addEventListener("keydown", e => {
 $(".sb svg").addEventListener("click", runSearch);
 document.addEventListener("click", e => {
   if (!e.target.closest(".sb")) closeSug();
-  const t = e.target.closest("#logoBtn,[data-lb],#lb,[data-sg],[data-w],[data-a],[data-id],[data-v],[data-go],[data-cat],[data-brand],[data-p],[data-m],[data-dgo],[data-dbrand],[data-dv],#more,#clr,#menuBtn,#cartBtn,#dsh");
+  { const sm = $("#sortm"); if (sm && !e.target.closest(".sortw")) sm.classList.remove("open"); }
+  const t = e.target.closest("#logoBtn,[data-lb],#lb,#sortb,[data-sort],[data-sg],[data-w],[data-a],[data-id],[data-v],[data-go],[data-cat],[data-brand],[data-p],[data-m],[data-dgo],[data-dbrand],[data-dv],#more,#clr,#menuBtn,#cartBtn,#dsh");
   if (!t) return;
   const D = t.dataset;
   if (t.id === "logoBtn" || D.lb !== undefined){ $("#lbi").src = LOGO; $("#lb").classList.add("open"); return; }
   if (t.id === "lb") return $("#lb").classList.remove("open");
   if (D.sg !== undefined) return pickSug(SG[+D.sg]);
+  if (t.id === "sortb"){ $("#sortm").classList.toggle("open"); return; }
+  if (D.sort !== undefined){ F.sort = D.sort; return draw(true); }
   if (D.w) return wishT(+D.w);
   if (D.a) return add(+D.a);
   if (t.id === "menuBtn") return drawer(true);

@@ -124,3 +124,12 @@ main,#sheet .body{scrollbar-width:none;-ms-overflow-style:none}
 main::-webkit-scrollbar,#sheet .body::-webkit-scrollbar,#pn2::-webkit-scrollbar{width:0!important;height:0!important;display:none!important;background:transparent!important}
 .si{position:absolute;top:0;right:4px;width:5px;height:100%;z-index:40;pointer-events:none}
 .sit{position:absolute;left:0;top:0;width:5px;height:70px;border-radius:999px;background:#e0197d;opacity:0;transition:top .05s linear,opacity .2s}
+
+/* Sort menu: chhota, neela, kone (right side) mein */
+.sortw{position:relative}
+.sortb{font:inherit;font-size:.85rem;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff}
+.sortm{display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:152px;background:#2563eb;border-radius:12px;box-shadow:0 8px 22px #2563eb55;overflow:hidden;z-index:12}
+.sortm.open{display:block}
+.sortm button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:9px 12px;color:#fff;font-size:.8rem;text-align:left;border-bottom:1px solid #ffffff33}
+.sortm button:last-child{border:0}
+.sortm button.on{background:#1d4ed8;font-weight:700}
