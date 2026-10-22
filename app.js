@@ -1,19 +1,21 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 7: My Cart, All Products, video 3 second autoplay, title tap opens product */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 8: My Cart, All Products, video 3 second autoplay, title tap opens product, newest cart item on top */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
 const pkr = n => "Rs. " + n.toLocaleString("en-PK");
 const store = { get(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
-let cart = store.get("ut_cart", {}), wish = store.get("ut_wish", []);
+let cart = store.get("ut_cart", {}), wish = store.get("ut_wish", []), ord = store.get("ut_ord", []);
 let view = "home", F = { cat: "", brand: "", q: "", sort: "" }, page = 24, slide = 0, timer;
 const CATS = Object.keys(CAT_LABEL).filter(c => PRODUCTS.some(p => p.category === c));
 const first = c => PRODUCTS.find(p => p.category === c);
 const ICON = { home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>', cats:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>', wish:'<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>', cart:'<path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/>', acct:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>' };
 const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>';
+/* Cart mein sab se nayi add ki hui cheez sab se upar dikhti hai */
+const cartItems = () => { const r = id => { const i = ord.indexOf(+id); return i < 0 ? 1e9 : i; }; return Object.entries(cart).sort((a, b) => r(a[0]) - r(b[0])); };
 const cartCount = () => Object.values(cart).reduce((a, b) => a + b, 0);
 const cartTotal = () => Object.entries(cart).reduce((s, [id, q]) => s + (byId(+id) ? byId(+id).price * q : 0), 0);
 function toast(t){ const e = $("#toast"); e.textContent = t; e.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("show"), 1500); }
-function save(){ store.set("ut_cart", cart); store.set("ut_wish", wish); }
+function save(){ store.set("ut_cart", cart); store.set("ut_wish", wish); store.set("ut_ord", ord); }
 function card(p){
   return `<div class="pc" data-id="${p.id}"><div class="pi"><img src="${p.image}" alt="" loading="lazy" decoding="async"><button class="heart ${wish.includes(p.id) ? "on" : ""}" data-w="${p.id}" aria-label="Wishlist">${HEART}</button></div><div class="pn">${p.name}</div><div class="pb">${p.brand}</div><div class="pp"><b>${pkr(p.price)}</b><button class="add" data-a="${p.id}" aria-label="Add to cart">+</button></div></div>`;
 }
@@ -53,11 +55,11 @@ function wishV(){
   return `<div class="sec" style="margin-top:8px"><h3 class="serif">Wishlist</h3></div>` + (l.length ? `<div class="grid">${l.map(card).join("")}</div>` : `<div class="empty"><b>Wishlist khali hai</b>Pasandida products par &#9825; dabayein.</div>`);
 }
 function msg(){
-  const lines = Object.entries(cart).map(([id, q]) => { const p = byId(+id); return p ? `- ${p.name} (${p.brand}) x${q} = ${pkr(p.price * q)}` : ""; }).filter(Boolean);
+  const lines = cartItems().map(([id, q]) => { const p = byId(+id); return p ? `- ${p.name} (${p.brand}) x${q} = ${pkr(p.price * q)}` : ""; }).filter(Boolean);
   return `https://wa.me/${WA}?text=` + encodeURIComponent(`Assalam-o-Alaikum, mujhe yeh order karna hai:\n${lines.join("\n")}\nTotal: ${pkr(cartTotal())}`);
 }
 function cartV(){
-  const items = Object.entries(cart).filter(([id]) => byId(+id));
+  const items = cartItems().filter(([id]) => byId(+id));
   if (!items.length) return `<div class="empty"><b>Cart khali hai</b>Products add karein aur WhatsApp par order bhejein.</div>`;
   return `<div class="sec" style="margin-top:8px"><h3 class="serif">My Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" data-id="${p.id}" style="min-height:0;cursor:pointer">${p.name}</div><div class="pb" data-id="${p.id}" style="cursor:pointer">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
   <div class="tot"><span>Total</span><span>${pkr(cartTotal())}</span></div><a class="wa" href="${msg()}" target="_blank" rel="noopener">WhatsApp par Order Karein</a>`;
@@ -91,7 +93,7 @@ function draw(keep){
 function go(i){ slide = (i + SL.length) % SL.length; const s = $("#slides"); if (!s) return; s.style.transform = `translateX(-${slide * 100}%)`; document.querySelectorAll("#dots i").forEach((d, k) => d.classList.toggle("on", k === slide)); }
 function show(v){ view = v; draw(); }
 function toList(o){ F = Object.assign({ cat: "", brand: "", q: "", sort: "" }, o); page = 24; $("#q").value = F.q; show("list"); }
-function add(id, n){ cart[id] = (cart[id] || 0) + (n || 1); save(); toast("Cart mein add ho gaya"); $("#cartBadge").textContent = cartCount(); draw(true); }
+function add(id, n){ cart[id] = (cart[id] || 0) + (n || 1); ord = [+id, ...ord.filter(x => x !== +id)]; save(); toast("Cart mein add ho gaya"); $("#cartBadge").textContent = cartCount(); draw(true); }
 function wishT(id){ wish = wish.includes(id) ? wish.filter(x => x !== id) : [...wish, id]; save(); draw(true); }
 let vidTimer = 0;
 function openP(id){
@@ -167,9 +169,9 @@ document.addEventListener("click", e => {
   if (D.cat !== undefined && !D.id) return toList(view === "list" ? Object.assign({}, F, { cat: D.cat }) : { cat: D.cat });
   if (D.brand !== undefined) return toList(view === "list" ? Object.assign({}, F, { brand: D.brand }) : { brand: D.brand });
   if (D.p){ cart[D.p]++; save(); return draw(true); }
-  if (D.m){ cart[D.m]--; if (cart[D.m] <= 0) delete cart[D.m]; save(); return draw(true); }
+  if (D.m){ cart[D.m]--; if (cart[D.m] <= 0){ delete cart[D.m]; ord = ord.filter(x => x !== +D.m); } save(); return draw(true); }
   if (t.id === "more"){ page += 24; return draw(true); }
-  if (t.id === "clr"){ cart = {}; save(); return draw(); }
+  if (t.id === "clr"){ cart = {}; ord = []; save(); return draw(); }
   if (D.id) return openP(+D.id);
 });
 document.addEventListener("change", e => { if (e.target.id === "sort"){ F.sort = e.target.value; draw(true); } });
