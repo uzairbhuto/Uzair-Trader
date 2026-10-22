@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 6: My Cart, All Products, video 3 second autoplay, chips position, no Cart khali button */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 7: My Cart, All Products, video 3 second autoplay, title tap opens product */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -59,7 +59,7 @@ function msg(){
 function cartV(){
   const items = Object.entries(cart).filter(([id]) => byId(+id));
   if (!items.length) return `<div class="empty"><b>Cart khali hai</b>Products add karein aur WhatsApp par order bhejein.</div>`;
-  return `<div class="sec" style="margin-top:8px"><h3 class="serif">My Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" style="min-height:0">${p.name}</div><div class="pb">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
+  return `<div class="sec" style="margin-top:8px"><h3 class="serif">My Cart</h3></div>${items.map(([id, q]) => { const p = byId(+id); return `<div class="ci"><div class="pi" data-id="${p.id}"><img src="${p.image}" alt=""></div><div class="tx"><div class="pn" data-id="${p.id}" style="min-height:0;cursor:pointer">${p.name}</div><div class="pb" data-id="${p.id}" style="cursor:pointer">${p.brand} &middot; ${pkr(p.price)}</div><div class="pp"><span class="q"><button data-m="${p.id}">&minus;</button><span>${q}</span><button data-p="${p.id}">+</button></span><b>${pkr(p.price * q)}</b></div></div></div>`; }).join("")}
   <div class="tot"><span>Total</span><span>${pkr(cartTotal())}</span></div><a class="wa" href="${msg()}" target="_blank" rel="noopener">WhatsApp par Order Karein</a>`;
 }
 function acct(){
