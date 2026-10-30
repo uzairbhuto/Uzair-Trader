@@ -1,4 +1,4 @@
-/* style.css VERSION 11 - pink sort menu with white lines */
+/* style.css VERSION 17 - bigger bold All Products in menu */
 /* Uzair Traders - website ka design (rang, layout, buttons) */
 :root{--pk:#e0197d;--pk2:#c2106a;--soft:#fde8f0;--soft2:#fff5f9;--ink:#1b1b22;--mut:#7b7b88;--line:#f0e1e8;--bg:#fff}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -131,5 +131,55 @@ main::-webkit-scrollbar,#sheet .body::-webkit-scrollbar,#pn2::-webkit-scrollbar{
 .sortb{font:inherit;font-size:.85rem;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff}
 .sortm{display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:184px;background:var(--pk);border-radius:14px;box-shadow:0 10px 26px #e0197d55;overflow:hidden;z-index:12}
 .sortm.open{display:block}
-.sortm button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px 15px;color:#fff;font-size:.95rem;text-align:left;border-bottom:1.5px solid #ffffff80}
+.sortm button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px 15px;color:#fff;font-size:.95rem;text-align:left;border-bottom:1.5px solid #ffffffd0}
 .sortm button.on{background:var(--pk2);font-weight:700}
+
+/* Cart drawer + checkout (pink theme) */
+#cartd{position:absolute;inset:0;z-index:35;display:none}
+#cartd.open{display:block}
+.cdo{position:absolute;inset:0;background:#0007}
+.cdp{position:absolute;top:0;right:0;bottom:0;width:min(92%,430px);background:#fff;display:flex;flex-direction:column;box-shadow:-10px 0 30px #0004;animation:cdin .22s ease}
+@keyframes cdin{from{transform:translateX(100%)}to{transform:none}}
+.cdh{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 12px 8px 16px;border-bottom:1px solid var(--line)}
+.cdh h3{font-size:1.45rem}
+.cdh .ib svg{width:24px;height:24px}
+.cdb{flex:1;overflow-y:auto;padding:6px 16px 16px;scrollbar-width:none}
+.cdb::-webkit-scrollbar{display:none}
+.cdf{padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff}
+.cdt{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:800;margin-bottom:10px}
+.cdbtn{display:block;width:100%;background:var(--pk);color:#fff;padding:15px;border-radius:14px;font-weight:700;font-size:1.02rem;text-align:center;text-decoration:none}
+.cdbtn.wa{background:#25d366;margin-top:14px}
+.cdi{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.cdi .pi{width:78px;flex:none;cursor:pointer}
+.cdi .tx{flex:1;min-width:0}
+.cdi .pn{min-height:0;cursor:pointer}
+.rm{color:var(--pk);font-size:.84rem;font-weight:600;padding:6px 0 0}
+.fld{margin-top:14px}
+.fld label{display:block;font-size:.88rem;color:var(--mut);margin-bottom:6px}
+.fld input,.fld textarea{width:100%;font:inherit;font-size:1rem;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;outline:0;background:#fff;color:var(--ink)}
+.fld textarea{min-height:96px;resize:vertical}
+.fld input:focus,.fld textarea:focus{border-color:var(--pk)}
+.fld .err{display:none;color:#d11a2a;font-size:.8rem;margin-top:5px}
+.fld.bad .err{display:block}
+.fld.bad input,.fld.bad textarea{border-color:#d11a2a}
+.cds{text-align:center;padding:56px 6px 10px}
+.cds h4{color:var(--pk);font-size:1.45rem;margin-bottom:12px}
+.cds p{color:#555;line-height:1.7}
+.cds .mut{color:var(--mut);font-size:.84rem;margin-top:18px}
+#fcart{position:absolute;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;background:var(--pk);box-shadow:0 6px 18px #e0197d66;z-index:15;display:grid;place-items:center}
+#fcart svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#fbadge{position:absolute;top:-5px;right:-5px;min-width:21px;height:21px;border-radius:11px;background:#e11d2e;color:#fff;border:2px solid #fff;font-size:.72rem;font-weight:700;display:grid;place-items:center;padding:0 4px}
+#fbadge:empty{display:none}
+#sheet.open ~ #fcart,#drawer.open ~ #fcart,#cartd.open ~ #fcart{display:none}
+#toast{z-index:50}
+
+/* Payment method cards */
+.pm{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px;background:#fff}
+.pm b{display:block;font-size:.98rem}
+.pm small{display:block;color:var(--mut);font-size:.82rem;margin-top:2px}
+.pm.on{border-color:var(--pk);background:var(--soft2);box-shadow:0 0 0 1px var(--pk) inset}
+.pm.off{opacity:.55}
+.cdbtn.alt{background:#fff;color:var(--pk);border:1.5px solid var(--pk);margin-top:10px}
+
+.cds .nm{font-size:1.2rem;font-weight:700;color:var(--ink);margin:0 0 16px;word-break:break-word}
+.pn2 button.l.b{font-weight:700;font-size:1.18rem}

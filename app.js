@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 9: My Cart, All Products, video 3 second autoplay, title tap opens product, newest cart item on top, All Brands, blue sort menu */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 16 (WhatsApp order version): cart as a page + WhatsApp Order button; All Products bold in menu, darker lines in sort menu, all earlier edits */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -85,7 +85,7 @@ function draw(keep){
     if (ar.left < rr.left + 8 || ar.right > rr.right - 8) r.scrollLeft += (ar.left + ar.width / 2) - (rr.left + rr.width / 2);
   });
   $("#nav").innerHTML = [["home", "Home"], ["cats", "Categories"], ["wish", "Wishlist"], ["cart", "Cart"], ["acct", "Account"]].map(([k, t]) => `<button data-v="${k}" class="${view === k || (view === "list" && k === "cats") ? "on" : ""}"><svg viewBox="0 0 24 24">${ICON[k]}</svg>${t}${k === "cart" ? `<span class="badge">${cartCount() || ""}</span>` : ""}${k === "wish" ? `<span class="badge">${wish.length || ""}</span>` : ""}</button>`).join("");
-  $("#cartBadge").textContent = cartCount() || "";
+  $("#cartBadge").textContent = cartCount() || ""; if ($("#fbadge")) $("#fbadge").textContent = cartCount() || "";
   $(".sb").style.display = ["cart", "acct"].includes(view) ? "none" : "";
   clearInterval(timer);
   if (view === "home") timer = setInterval(() => go(slide + 1), 4500);
@@ -113,11 +113,12 @@ function openP(id){
   }, 3000);
   try { history.pushState({ sheet: 1 }, ""); } catch (e) {}
 }
-function closeP(){ clearTimeout(vidTimer); const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; try { if (history.state && history.state.sheet) history.back(); } catch (e) {} } }
-window.addEventListener("popstate", () => { clearTimeout(vidTimer); const s = $("#sheet"); if (s.classList.contains("open")){ s.classList.remove("open"); s.innerHTML = ""; } $("#drawer").classList.remove("open"); });
+function hideSheet(){ clearTimeout(vidTimer); const s = $("#sheet"); if (!s.classList.contains("open")) return false; s.classList.remove("open"); s.innerHTML = ""; return true; }
+function closeP(){ if (hideSheet()){ try { if (history.state && history.state.sheet) history.back(); } catch (e) {} } }
+window.addEventListener("popstate", () => { hideSheet(); $("#drawer").classList.remove("open"); });
 function drawer(o){
   const d = $("#drawer"); d.classList.toggle("open", o);
-  if (o) $("#pn2").innerHTML = `<div class="logo serif" style="margin-bottom:14px"><img src="${LOGO}" alt="">Uzair <b>Traders</b></div><button class="l" data-dgo="">All Products</button><div class="pb" style="margin:14px 0 4px">BRANDS</div>${BRANDS.map(b => `<button class="l" data-dbrand="${b}">${b}</button>`).join("")}<div class="pb" style="margin:14px 0 4px">MORE</div><button class="l" data-dv="acct">Rabta &amp; Auqat</button><a class="l" style="display:block;padding:11px 0;color:#25a244;text-decoration:none;font-weight:600" target="_blank" rel="noopener" href="https://wa.me/${WA}">WhatsApp: 0319-3455171</a>`;
+  if (o) $("#pn2").innerHTML = `<div class="logo serif" style="margin-bottom:14px"><img src="${LOGO}" alt="">Uzair <b>Traders</b></div><button class="l b" data-dgo="">All Products</button><div class="pb" style="margin:14px 0 4px">BRANDS</div>${BRANDS.map(b => `<button class="l" data-dbrand="${b}">${b}</button>`).join("")}<div class="pb" style="margin:14px 0 4px">MORE</div><button class="l" data-dv="acct">Rabta &amp; Auqat</button><a class="l" style="display:block;padding:11px 0;color:#25a244;text-decoration:none;font-weight:600" target="_blank" rel="noopener" href="https://wa.me/${WA}">WhatsApp: 0319-3455171</a>`;
 }
 
 let SG = [], sgI = -1;
@@ -185,7 +186,7 @@ document.addEventListener("touchend", e => { if (view === "home" && e.target.clo
 (function(){
   const app = $("#app"), box = document.createElement("div"); box.className = "si"; box.innerHTML = '<div class="sit" id="sit"></div>'; app.appendChild(box);
   const thumb = box.firstChild; let raf = 0;
-  function scroller(){ if ($("#drawer").classList.contains("open")) return null; return $("#sheet").classList.contains("open") ? $("#sheet .body") : $("#main"); }
+  function scroller(){ if ($("#drawer").classList.contains("open") || ($("#cartd") && $("#cartd").classList.contains("open"))) return null; return $("#sheet").classList.contains("open") ? $("#sheet .body") : $("#main"); }
   function update(){
     raf = 0; const el = scroller(); if (!el) { thumb.style.opacity = 0; return; }
     const max = el.scrollHeight - el.clientHeight; if (max <= 2) { thumb.style.opacity = 0; return; }
