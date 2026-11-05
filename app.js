@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 16 (WhatsApp order version): cart as a page + WhatsApp Order button; All Products bold in menu, darker lines in sort menu, all earlier edits */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 17 (WhatsApp order version): Android Back button/gesture + Back arrow on every page, cart as a page + WhatsApp Order button, all earlier edits */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -75,6 +75,10 @@ function draw(keep){
   if (!keep && document.activeElement !== $("#q")) closeSug();
   const m = $("#main"), y = m.scrollTop, oldRows = [...m.querySelectorAll(".chips")].map(r => r.scrollLeft);
   m.innerHTML = { home, list, cats, wish: wishV, cart: cartV, acct }[view]();
+  if (view !== "home"){ /* har page par upar chhota Back arrow */
+    const bk = '<button class="bk" data-bk aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>', h = m.querySelector(".sec h3");
+    if (h) h.insertAdjacentHTML("afterbegin", bk); else m.insertAdjacentHTML("afterbegin", '<div class="sec" style="margin:8px 0 0">' + bk + "</div>");
+  }
   m.scrollTop = keep ? y : 0;
   /* Filter chips: purani position wahi rakhein, aur selected chip hamesha nazar aaye */
   const rows = [...m.querySelectorAll(".chips")];
@@ -91,7 +95,17 @@ function draw(keep){
   if (view === "home") timer = setInterval(() => go(slide + 1), 4500);
 }
 function go(i){ slide = (i + SL.length) % SL.length; const s = $("#slides"); if (!s) return; s.style.transform = `translateX(-${slide * 100}%)`; document.querySelectorAll("#dots i").forEach((d, k) => d.classList.toggle("on", k === slide)); }
-function show(v){ view = v; draw(); }
+/* ---- Android Back button / gesture support: har page history mein ek entry banata hai, Back dabane par pichla page aata hai ---- */
+let navDepth = 0;
+const navSnap = () => ({ view, F: Object.assign({}, F) });
+function navSync(push, sy){
+  try {
+    if (push){ history.replaceState(Object.assign({}, history.state, { sy: sy || 0 }), ""); navDepth++; history.pushState({ nav: navSnap(), d: navDepth }, ""); }
+    else history.replaceState({ nav: navSnap(), d: navDepth, sy: (history.state && history.state.sy) || 0 }, "");
+  } catch (e) {}
+}
+function goBack(){ try { if (navDepth > 0){ history.back(); return; } } catch (e) {} show("home"); }
+function show(v){ const sy = $("#main").scrollTop, push = v !== view; view = v; draw(); navSync(push, sy); }
 function toList(o){ F = Object.assign({ cat: "", brand: "", q: "", sort: "" }, o); page = 24; $("#q").value = F.q; show("list"); }
 function add(id, n){ cart[id] = (cart[id] || 0) + (n || 1); ord = [+id, ...ord.filter(x => x !== +id)]; save(); toast("Cart mein add ho gaya"); $("#cartBadge").textContent = cartCount(); draw(true); }
 function wishT(id){ wish = wish.includes(id) ? wish.filter(x => x !== id) : [...wish, id]; save(); draw(true); }
@@ -111,11 +125,18 @@ function openP(id){
     const v = s.querySelector("video"); if (!v || !s.classList.contains("open")) return;
     if (v.paused && v.currentTime === 0 && !v.ended){ const r = v.play(); if (r && r.catch) r.catch(() => { v.muted = true; v.play().catch(() => {}); }); }
   }, 3000);
-  try { history.pushState({ sheet: 1 }, ""); } catch (e) {}
+  try { history.pushState({ sheet: 1, d: navDepth }, ""); } catch (e) {}
 }
 function hideSheet(){ clearTimeout(vidTimer); const s = $("#sheet"); if (!s.classList.contains("open")) return false; s.classList.remove("open"); s.innerHTML = ""; return true; }
 function closeP(){ if (hideSheet()){ try { if (history.state && history.state.sheet) history.back(); } catch (e) {} } }
-window.addEventListener("popstate", () => { hideSheet(); $("#drawer").classList.remove("open"); });
+window.addEventListener("popstate", e => {
+  hideSheet(); $("#drawer").classList.remove("open");
+  const st = e.state; if (st && typeof st.d === "number") navDepth = st.d;
+  if (st && st.nav && !st.sheet){
+    const n = st.nav;
+    if (n.view !== view || JSON.stringify(n.F) !== JSON.stringify(F)){ view = n.view; F = Object.assign({ cat: "", brand: "", q: "", sort: "" }, n.F); page = 24; $("#q").value = F.q || ""; draw(); $("#main").scrollTop = st.sy || 0; }
+  }
+});
 function drawer(o){
   const d = $("#drawer"); d.classList.toggle("open", o);
   if (o) $("#pn2").innerHTML = `<div class="logo serif" style="margin-bottom:14px"><img src="${LOGO}" alt="">Uzair <b>Traders</b></div><button class="l b" data-dgo="">All Products</button><div class="pb" style="margin:14px 0 4px">BRANDS</div>${BRANDS.map(b => `<button class="l" data-dbrand="${b}">${b}</button>`).join("")}<div class="pb" style="margin:14px 0 4px">MORE</div><button class="l" data-dv="acct">Rabta &amp; Auqat</button><a class="l" style="display:block;padding:11px 0;color:#25a244;text-decoration:none;font-weight:600" target="_blank" rel="noopener" href="https://wa.me/${WA}">WhatsApp: 0319-3455171</a>`;
@@ -152,14 +173,15 @@ $(".sb svg").addEventListener("click", runSearch);
 document.addEventListener("click", e => {
   if (!e.target.closest(".sb")) closeSug();
   { const sm = $("#sortm"); if (sm && !e.target.closest(".sortw")) sm.classList.remove("open"); }
-  const t = e.target.closest("#logoBtn,[data-lb],#lb,#sortb,[data-sort],[data-sg],[data-w],[data-a],[data-id],[data-v],[data-go],[data-cat],[data-brand],[data-p],[data-m],[data-dgo],[data-dbrand],[data-dv],#more,#clr,#menuBtn,#cartBtn,#dsh");
+  const t = e.target.closest("#logoBtn,[data-lb],#lb,#sortb,[data-sort],[data-bk],[data-sg],[data-w],[data-a],[data-id],[data-v],[data-go],[data-cat],[data-brand],[data-p],[data-m],[data-dgo],[data-dbrand],[data-dv],#more,#clr,#menuBtn,#cartBtn,#dsh");
   if (!t) return;
   const D = t.dataset;
   if (t.id === "logoBtn" || D.lb !== undefined){ $("#lbi").src = LOGO; $("#lb").classList.add("open"); return; }
   if (t.id === "lb") return $("#lb").classList.remove("open");
   if (D.sg !== undefined) return pickSug(SG[+D.sg]);
   if (t.id === "sortb"){ $("#sortm").classList.toggle("open"); return; }
-  if (D.sort !== undefined){ F.sort = D.sort; return draw(true); }
+  if (D.bk !== undefined) return goBack();
+  if (D.sort !== undefined){ F.sort = D.sort; draw(true); navSync(false); return; }
   if (D.w) return wishT(+D.w);
   if (D.a) return add(+D.a);
   if (t.id === "menuBtn") return drawer(true);
@@ -179,7 +201,7 @@ document.addEventListener("click", e => {
   if (D.id) return openP(+D.id);
 });
 document.addEventListener("change", e => { if (e.target.id === "sort"){ F.sort = e.target.value; draw(true); } });
-$("#q").addEventListener("input", e => { F = { cat: "", brand: "", q: e.target.value, sort: F.sort }; page = 24; if (view !== "list") view = "list"; draw(); renderSug(e.target.value); });
+$("#q").addEventListener("input", e => { const sy = $("#main").scrollTop, was = view; F = { cat: "", brand: "", q: e.target.value, sort: F.sort }; page = 24; if (view !== "list") view = "list"; draw(); navSync(was !== "list", sy); renderSug(e.target.value); });
 let sx = 0; document.addEventListener("touchstart", e => sx = e.touches[0].clientX, { passive: true });
 document.addEventListener("touchend", e => { if (view === "home" && e.target.closest(".hero")){ const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 40) go(slide + (d < 0 ? 1 : -1)); } }, { passive: true });
 /* Pink scroll indicator: same size as the old yellow one (5px x 70px), follows whichever page/sheet is scrolling */
@@ -201,3 +223,4 @@ document.addEventListener("touchend", e => { if (view === "home" && e.target.clo
 })();
 document.getElementById("hl").src = LOGO;
 draw();
+navSync(false);
