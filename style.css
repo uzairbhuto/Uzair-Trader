@@ -1,4 +1,4 @@
-/* style.css VERSION 18 - back arrow */
+/* style.css VERSION 19 - swipe back bubble */
 /* Uzair Traders - website ka design (rang, layout, buttons) */
 :root{--pk:#e0197d;--pk2:#c2106a;--soft:#fde8f0;--soft2:#fff5f9;--ink:#1b1b22;--mut:#7b7b88;--line:#f0e1e8;--bg:#fff}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -187,3 +187,7 @@ main::-webkit-scrollbar,#sheet .body::-webkit-scrollbar,#pn2::-webkit-scrollbar{
 /* Back arrow (har page ke heading ke saath) */
 .bk{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1.5px solid var(--line);border-radius:50%;background:#fff;margin-right:10px;vertical-align:middle;color:var(--ink)}
 .bk svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Left-edge swipe back bubble */
+#swb{position:absolute;left:0;top:50%;width:46px;height:46px;margin-top:-23px;border-radius:50%;background:#26232be8;display:grid;place-items:center;opacity:0;transform:translateX(-60px);transition:transform .18s ease,opacity .18s;z-index:60;pointer-events:none;box-shadow:0 4px 14px #0005}
+#swb svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}

@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 17 (WhatsApp order version): Android Back button/gesture + Back arrow on every page, cart as a page + WhatsApp Order button, all earlier edits */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 18 (WhatsApp order version): swipe from left edge = Back (with arrow bubble), Android Back button/gesture + Back arrow on every page, cart as a page + WhatsApp Order button, all earlier edits */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -224,3 +224,33 @@ document.addEventListener("touchend", e => { if (view === "home" && e.target.clo
 document.getElementById("hl").src = LOGO;
 draw();
 navSync(false);
+
+/* ---- Left se right kheench kar Back (screen ke baayen kinare se) + arrow wala gol bubble ---- */
+(function(){
+  const app = $("#app"), bub = document.createElement("div"); bub.id = "swb";
+  bub.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'; app.appendChild(bub);
+  const EDGE = 36, GO = 70; let sx = 0, sy = 0, on = false, track = false, dx = 0;
+  const canBack = () => { const cd = $("#cartd"); return $("#sheet").classList.contains("open") || $("#drawer").classList.contains("open") || !!(cd && cd.classList.contains("open")) || navDepth > 0 || view !== "home"; };
+  const doBack = () => {
+    if ($("#sheet").classList.contains("open")) return closeP();
+    const cd = $("#cartd"); if (cd && cd.classList.contains("open")) return closeCart();
+    if ($("#drawer").classList.contains("open")) return drawer(false);
+    goBack();
+  };
+  const place = x => { bub.style.transition = "none"; bub.style.opacity = Math.min(1, x / 40); bub.style.transform = "translateX(" + (Math.min(x * 0.6, 74) - 56) + "px)"; };
+  const hide = () => { bub.style.transition = ""; bub.style.opacity = 0; bub.style.transform = "translateX(-60px)"; };
+  const skip = t => { const r = t && t.closest && t.closest(".row,.chips,.cats,.hero"); return !!(r && (r.className === "hero" || r.scrollLeft > 0)); };
+  document.addEventListener("touchstart", e => {
+    const t = e.touches[0], ar = app.getBoundingClientRect(); on = track = false; dx = 0;
+    if (e.touches.length !== 1 || t.clientX - ar.left > EDGE || !canBack() || skip(e.target)) return;
+    on = true; sx = t.clientX; sy = t.clientY;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!on) return; const t = e.touches[0]; dx = t.clientX - sx; const dy = t.clientY - sy;
+    if (!track){ if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ on = false; hide(); return; } if (dx > 8 && dx > Math.abs(dy)) track = true; }
+    if (track){ if (e.cancelable) e.preventDefault(); place(dx); }
+  }, { passive: false });
+  document.addEventListener("touchend", () => { if (on && track && dx > GO){ hide(); doBack(); } else hide(); on = track = false; dx = 0; }, { passive: true });
+  document.addEventListener("touchcancel", () => { hide(); on = track = false; dx = 0; }, { passive: true });
+})();
+
