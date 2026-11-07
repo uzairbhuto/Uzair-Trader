@@ -1,4 +1,4 @@
-/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 18 (WhatsApp order version): swipe from left edge = Back (with arrow bubble), Android Back button/gesture + Back arrow on every page, cart as a page + WhatsApp Order button, all earlier edits */
+/* Uzair Traders - website ka code (search, cart, wishlist, pages). Data products.js se aata hai. | VERSION 19 (WhatsApp order version): smaller round swipe bubble, swipe from left edge = Back, Android Back button/gesture + Back arrow on every page, cart as a page + WhatsApp Order button, all earlier edits */
 const CAT_LABEL = { makeup:"Makeup", skincare:"Skincare", facewash:"Face Wash", soap:"Soap", lotion:"Lotion", cream:"Cream", shampoo:"Shampoo", stationery:"Stationery", supplement:"Fiber Supplement", toothpaste:"Oral Care", food:"Food", healthcare:"Health Care", herbaltea:"Herbal Tea", haircare:"Hair Care", diaper:"Diapers" };
 const WA = "923193455171";
 const $ = s => document.querySelector(s), byId = id => PRODUCTS.find(p => p.id === id);
@@ -237,8 +237,8 @@ navSync(false);
     if ($("#drawer").classList.contains("open")) return drawer(false);
     goBack();
   };
-  const place = x => { bub.style.transition = "none"; bub.style.opacity = Math.min(1, x / 40); bub.style.transform = "translateX(" + (Math.min(x * 0.6, 74) - 56) + "px)"; };
-  const hide = () => { bub.style.transition = ""; bub.style.opacity = 0; bub.style.transform = "translateX(-60px)"; };
+  const place = x => { bub.style.transition = "none"; bub.style.opacity = Math.min(1, x / 40); bub.style.transform = "translateX(" + (Math.min(x * 0.7, 50) - 38) + "px)"; };
+  const hide = () => { bub.style.transition = ""; bub.style.opacity = 0; bub.style.transform = "translateX(-44px)"; };
   const skip = t => { const r = t && t.closest && t.closest(".row,.chips,.cats,.hero"); return !!(r && (r.className === "hero" || r.scrollLeft > 0)); };
   document.addEventListener("touchstart", e => {
     const t = e.touches[0], ar = app.getBoundingClientRect(); on = track = false; dx = 0;
